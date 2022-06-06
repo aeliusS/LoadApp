@@ -20,7 +20,7 @@ class LoadingButton @JvmOverloads constructor(
     private var yTextCenter = 0.0f
 
     private val textPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        strokeWidth = resources.getDimension(R.dimen.strokeWidth)
+        strokeWidth = resources.getDimension(R.dimen.stroke_width)
         textSize = resources.getDimension(R.dimen.default_text_size)
         textAlign = Paint.Align.CENTER
         color = ResourcesCompat.getColor(resources, R.color.white, null)
@@ -39,6 +39,11 @@ class LoadingButton @JvmOverloads constructor(
 
     // use the delegates observable to react to the different button states
     private var buttonState: ButtonState by Delegates.observable(ButtonState.Completed) { prop, old, new ->
+        when (new) {
+            ButtonState.Loading -> contentDescription = resources.getString(R.string.button_loading)
+            ButtonState.Completed -> contentDescription = resources.getString(R.string.button_download)
+            else -> {}
+        }
 
     }
 
@@ -46,6 +51,14 @@ class LoadingButton @JvmOverloads constructor(
     init {
         isClickable = true
         Log.d("LoadingButton", "Loaded LoadingButton class")
+    }
+
+    override fun performClick(): Boolean {
+        super.performClick()
+
+        buttonState = ButtonState.Clicked
+        invalidate()
+        return true
     }
 
 
@@ -58,12 +71,15 @@ class LoadingButton @JvmOverloads constructor(
 
     private fun drawButton(canvas: Canvas) {
         rectF.bottom = widthSize.toFloat()
-        canvas.drawRoundRect(rectF, 1.0f, 1.0f, buttonPaint)
+        canvas.drawRect(rectF, buttonPaint)
     }
 
     private fun drawButtonText(canvas: Canvas) {
         canvas.drawText(
-            context.getString(R.string.button_download),
+            when (buttonState) {
+                ButtonState.Completed -> context.getString(R.string.button_download)
+                else -> context.getString(R.string.button_loading)
+            },
             xTextCenter,
             yTextCenter,
             textPaint
@@ -72,8 +88,8 @@ class LoadingButton @JvmOverloads constructor(
 
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
         super.onSizeChanged(w, h, oldw, oldh)
-        xTextCenter = (w/2).toFloat()
-        yTextCenter = (h/2).toFloat() - ((textPaint.descent() + textPaint.ascent()) /2)
+        xTextCenter = (w / 2).toFloat()
+        yTextCenter = (h / 2).toFloat() - ((textPaint.descent() + textPaint.ascent()) / 2)
 
         // update the button rectangle dimensions
         rectF.right = widthSize.toFloat()

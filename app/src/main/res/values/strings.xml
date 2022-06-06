@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name">LoadApp</string>
     <string name="app_description">Download files from Internet</string>
     <string name="action_settings">Settings</string>
@@ -11,4 +11,11 @@
     <string name="button_download">Download</string>
     <string name="button_loading">We are loading </string>
     <string name="title_activity_detail">DetailActivity</string>
+    <string name="cloud_download_image_decription">Cloud Download Image</string>
+
+    <string name="glide_radio_option">Glide - Image Loading Library by BumpTech</string>
+    <string name="load_app_radio_option">LoadApp - Current repository by Udacity</string>
+    <string name="retrofit_radio_option">Retrofit - Type-safe HTTP client for Android and Java by Square, Inc</string>
+
+    <string name="select_file_message">Please select the file to download</string>
 </resources>

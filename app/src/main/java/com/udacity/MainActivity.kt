@@ -9,6 +9,8 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.NotificationCompat
 import com.udacity.databinding.ActivityMainBinding
@@ -32,13 +34,26 @@ class MainActivity : AppCompatActivity() {
         registerReceiver(receiver, IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE))
 
         binding.contentMain.customButton.setOnClickListener {
+            if(!validRadioOption()) return@setOnClickListener
             download()
         }
+    }
+
+    private fun validRadioOption(): Boolean {
+        if (binding.contentMain.radioGroup.checkedRadioButtonId == -1) {
+            Toast.makeText(applicationContext, R.string.select_file_message, Toast.LENGTH_SHORT)
+                .show()
+            return false
+        }
+        return true
     }
 
     private val receiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             val id = intent?.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1)
+            if (id == downloadID) {
+                Log.i("MainActivity", "Download finished")
+            }
         }
     }
 
