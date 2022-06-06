@@ -3,11 +3,12 @@ package com.udacity
 import android.animation.ValueAnimator
 import android.content.Context
 import android.graphics.Canvas
-import android.graphics.Color
 import android.graphics.Paint
+import android.graphics.RectF
 import android.util.AttributeSet
 import android.util.Log
 import android.view.View
+import androidx.core.content.res.ResourcesCompat
 import kotlin.properties.Delegates
 
 class LoadingButton @JvmOverloads constructor(
@@ -18,45 +19,65 @@ class LoadingButton @JvmOverloads constructor(
     private var xTextCenter = 0.0f
     private var yTextCenter = 0.0f
 
-    private val paint = Paint().apply {
-        isAntiAlias = true
+    private val textPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         strokeWidth = resources.getDimension(R.dimen.strokeWidth)
         textSize = resources.getDimension(R.dimen.default_text_size)
         textAlign = Paint.Align.CENTER
-        color = Color.BLACK
+        color = ResourcesCompat.getColor(resources, R.color.white, null)
     }
+
+    private val buttonPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        style = Paint.Style.FILL
+        color = ResourcesCompat.getColor(resources, R.color.colorPrimary, null)
+    }
+
+    private var rectF = RectF(0.0f, 0.0f, 0.0f, 0.0f)
 
     // use this as a pulse to animate the circle in the button
     // https://medium.com/mindorks/android-property-animation-the-valueanimator-4ca173567cdb
     private val valueAnimator = ValueAnimator()
 
     // use the delegates observable to react to the different button states
-    private var buttonState: ButtonState by Delegates.observable<ButtonState>(ButtonState.Completed) { prop, old, new ->
+    private var buttonState: ButtonState by Delegates.observable(ButtonState.Completed) { prop, old, new ->
 
     }
 
 
     init {
+        isClickable = true
         Log.d("LoadingButton", "Loaded LoadingButton class")
     }
 
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-        // TODO: Draw rectangle
+        drawButton(canvas)
+        drawButtonText(canvas)
+        Log.d("LoadingButton", "Finished draw")
+    }
+
+    private fun drawButton(canvas: Canvas) {
+        rectF.bottom = widthSize.toFloat()
+        canvas.drawRoundRect(rectF, 1.0f, 1.0f, buttonPaint)
+    }
+
+    private fun drawButtonText(canvas: Canvas) {
         canvas.drawText(
             context.getString(R.string.button_download),
             xTextCenter,
             yTextCenter,
-            paint
+            textPaint
         )
-        Log.d("LoadingButton", "Finished draw")
     }
 
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
         super.onSizeChanged(w, h, oldw, oldh)
         xTextCenter = (w/2).toFloat()
-        yTextCenter = (h/2).toFloat() - ((paint.descent() + paint.ascent()) /2)
+        yTextCenter = (h/2).toFloat() - ((textPaint.descent() + textPaint.ascent()) /2)
+
+        // update the button rectangle dimensions
+        rectF.right = widthSize.toFloat()
+        rectF.bottom = heightSize.toFloat()
     }
 
     // https://medium.com/@quiro91/custom-view-mastering-onmeasure-a0a0bb11784d
