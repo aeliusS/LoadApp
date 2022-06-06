@@ -1,13 +1,17 @@
 package com.udacity
 
 import android.app.DownloadManager
+import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.graphics.BitmapFactory
+import android.graphics.Color
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
@@ -31,10 +35,16 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
         setSupportActionBar(binding.toolbar)
 
+        // create the notification channel
+        createChannel(
+            getString(R.string.notification_channel_id),
+            getString(R.string.notification_channel_name)
+        )
+
         registerReceiver(receiver, IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE))
 
         binding.contentMain.customButton.setOnClickListener {
-            if(!validRadioOption()) return@setOnClickListener
+            if (!validRadioOption()) return@setOnClickListener
             download()
         }
     }
@@ -48,11 +58,31 @@ class MainActivity : AppCompatActivity() {
         return true
     }
 
+    private fun createChannel(channelId: String, channelName: String) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val notificationChannel =
+                NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_DEFAULT)
+                    .apply {
+                        setShowBadge(true)
+                    }
+            notificationChannel.enableLights(true)
+            notificationChannel.lightColor = Color.BLUE
+            notificationChannel.enableVibration(true)
+            notificationChannel.description = "Download finished"
+
+            notificationManager = getSystemService(NotificationManager::class.java)
+            notificationManager.createNotificationChannel(notificationChannel)
+        }
+    }
+
     private val receiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context?, intent: Intent?) {
-            val id = intent?.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1)
+        override fun onReceive(context: Context, intent: Intent) {
+            val id = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1)
             if (id == downloadID) {
                 Log.i("MainActivity", "Download finished")
+                notificationManager.sendNotification(
+                    context.getText(R.string.notification_description).toString()
+                )
             }
         }
     }
@@ -71,10 +101,40 @@ class MainActivity : AppCompatActivity() {
             downloadManager.enqueue(request)// enqueue puts the download request in the queue.
     }
 
+    private fun NotificationManager.sendNotification(messageBody: String) {
+        val checkStatusIntent = Intent(applicationContext, DetailActivity::class.java)
+        pendingIntent = PendingIntent.getActivity(
+            applicationContext,
+            NOTIFICATION_ID,
+            checkStatusIntent,
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+        )
+        // the custom button
+        action = NotificationCompat.Action(
+            R.drawable.ic_assistant_black_24dp,
+            getString(R.string.notification_button),
+            pendingIntent
+        )
+
+        val builder = NotificationCompat.Builder(
+            applicationContext,
+            getString(R.string.notification_channel_id)
+        )
+            .setSmallIcon(R.drawable.ic_assistant_black_24dp)
+            .setContentTitle(getString(R.string.notification_title))
+            .setContentText(messageBody)
+            .setContentIntent(pendingIntent)
+            .setAutoCancel(true)
+            .addAction(action)
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+
+        notify(NOTIFICATION_ID, builder.build())
+    }
+
     companion object {
         private const val URL =
             "https://github.com/udacity/nd940-c3-advanced-android-programming-project-starter/archive/master.zip"
-        private const val CHANNEL_ID = "channelId"
+        private const val NOTIFICATION_ID = 0
     }
 
 }

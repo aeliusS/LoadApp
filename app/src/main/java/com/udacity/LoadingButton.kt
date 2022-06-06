@@ -77,8 +77,8 @@ class LoadingButton @JvmOverloads constructor(
     private fun drawButtonText(canvas: Canvas) {
         canvas.drawText(
             when (buttonState) {
-                ButtonState.Completed -> context.getString(R.string.button_download)
-                else -> context.getString(R.string.button_loading)
+                ButtonState.Loading -> context.getString(R.string.button_loading)
+                else -> context.getString(R.string.button_download)
             },
             xTextCenter,
             yTextCenter,
