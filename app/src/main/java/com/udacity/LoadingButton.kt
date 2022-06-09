@@ -5,12 +5,13 @@ import android.animation.AnimatorListenerAdapter
 import android.animation.ValueAnimator
 import android.content.Context
 import android.graphics.Canvas
+import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.RectF
 import android.util.AttributeSet
 import android.util.Log
 import android.view.View
-import androidx.core.content.res.ResourcesCompat
+import androidx.core.content.withStyledAttributes
 import kotlin.properties.Delegates
 
 class LoadingButton @JvmOverloads constructor(
@@ -21,11 +22,15 @@ class LoadingButton @JvmOverloads constructor(
     private var xTextCenter = 0.0f
     private var yTextCenter = 0.0f
 
+    private var buttonColor = 0
+    private var loadingWidthColor = 0
+    private var loadingCircleColor = 0
+    private var textColor = 0
+
     private val textPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         strokeWidth = resources.getDimension(R.dimen.stroke_width)
         textSize = resources.getDimension(R.dimen.default_text_size)
         textAlign = Paint.Align.CENTER
-        color = ResourcesCompat.getColor(resources, R.color.white, null)
     }
 
     private var buttonText = resources.getString(R.string.button_download)
@@ -36,27 +41,21 @@ class LoadingButton @JvmOverloads constructor(
     // determines how far way the loading circle will be placed after the text
     private val circleOffset = 10f
 
-    private val buttonPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        style = Paint.Style.FILL
-        color = ResourcesCompat.getColor(resources, R.color.colorPrimary, null)
-    }
+    private val buttonPaint = Paint(Paint.ANTI_ALIAS_FLAG)
 
-    private val circlePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        style = Paint.Style.FILL
-        strokeWidth = 25F
-        color = ResourcesCompat.getColor(resources, R.color.colorAccent, null)
-    }
+    private val circlePaint = Paint(Paint.ANTI_ALIAS_FLAG)
 
     private var buttonRectF = RectF()
+    private var loadingWidthRectF = RectF()
     private var arcRectF = RectF()
 
     // use this as a pulse to animate the circle in the button
     // https://medium.com/mindorks/android-property-animation-the-valueanimator-4ca173567cdb
     private val valueAnimator = ValueAnimator.ofFloat(0f, 1f).apply {
-        duration = 2000
+        duration = 1500
         addListener(object : AnimatorListenerAdapter() {
             override fun onAnimationEnd(animation: Animator?) {
-                percentageLoaded = -1.0f
+                resetButton()
                 Log.d("LoadingButton", "Finished animation")
             }
         })
@@ -70,9 +69,11 @@ class LoadingButton @JvmOverloads constructor(
     private var buttonState: ButtonState by Delegates.observable(ButtonState.Completed) { prop, old, new ->
         when (new) {
             ButtonState.Loading -> {
+                if(!valueAnimator.isRunning) valueAnimator.start()
                 buttonText = resources.getString(R.string.button_loading)
             }
             ButtonState.Completed -> {
+                // if(valueAnimator.isRunning) valueAnimator.end()
                 buttonText = resources.getString(R.string.button_download)
             }
             else -> {}
@@ -87,19 +88,32 @@ class LoadingButton @JvmOverloads constructor(
     init {
         isClickable = true
         Log.d("LoadingButton", "Loaded LoadingButton class")
+
+        context.withStyledAttributes(attrs, R.styleable.LoadingButton) {
+            buttonColor = getColor(R.styleable.LoadingButton_baseButtonColor, 0)
+            loadingWidthColor = getColor(R.styleable.LoadingButton_widthLoadingColor, 0)
+            loadingCircleColor = getColor(R.styleable.LoadingButton_loadingCircleColor, 0)
+            textColor = getColor(R.styleable.LoadingButton_textColor, Color.WHITE)
+        }
+
+        circlePaint.color = loadingCircleColor
+        textPaint.color = textColor
     }
 
-    override fun performClick(): Boolean {
-        super.performClick()
+    fun setButtonLoading() {
+        isClickable = false
+        buttonState = ButtonState.Loading
+    }
 
-        if (valueAnimator.isRunning) valueAnimator.end() else valueAnimator.start()
-        buttonState = ButtonState.Clicked
-        return true
+    fun setButtonCompletedDownload() {
+        buttonState = ButtonState.Completed
+        isClickable = true
     }
 
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
+        drawLoadingWidth(canvas)
         drawButton(canvas)
         drawButtonText(canvas)
         drawLoadingCircle(canvas)
@@ -119,7 +133,17 @@ class LoadingButton @JvmOverloads constructor(
         canvas.drawArc(arcRectF, 0F, 360F * percentageLoaded, true, circlePaint)
     }
 
+    private fun drawLoadingWidth(canvas: Canvas) {
+        if(percentageLoaded == -1.0f) return
+        buttonPaint.color = loadingWidthColor
+        loadingWidthRectF.right = widthSize.toFloat() * percentageLoaded
+        canvas.drawRect(loadingWidthRectF, buttonPaint)
+    }
+
     private fun drawButton(canvas: Canvas) {
+        buttonPaint.color = buttonColor
+        // limit overdraw
+        if(percentageLoaded != -1.0f) buttonRectF.left = loadingWidthRectF.right
         canvas.drawRect(buttonRectF, buttonPaint)
     }
 
@@ -137,15 +161,20 @@ class LoadingButton @JvmOverloads constructor(
         arcRectF.right = arcRectF.left + (2 * halfHeight * radius)
     }
 
+    private fun updateButtonDimen() {
+        buttonRectF.right = widthSize.toFloat()
+        buttonRectF.bottom = heightSize.toFloat()
+
+        loadingWidthRectF.bottom = heightSize.toFloat()
+    }
+
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
         super.onSizeChanged(w, h, oldw, oldh)
         xTextCenter = (w / 2).toFloat()
         yTextCenter = (h / 2).toFloat() - ((textPaint.descent() + textPaint.ascent()) / 2)
 
-        // update the button rectangle dimensions
-        buttonRectF.right = widthSize.toFloat()
-        buttonRectF.bottom = heightSize.toFloat()
-
+        // update dimensions
+        updateButtonDimen()
         updateLoadingCircleDimen()
     }
 
@@ -162,6 +191,13 @@ class LoadingButton @JvmOverloads constructor(
         widthSize = w
         heightSize = h
         setMeasuredDimension(w, h)
+    }
+
+    private fun resetButton() {
+        percentageLoaded = -1.0f
+        buttonRectF.left = 0.0f
+        buttonState = ButtonState.Completed
+        isClickable = true
     }
 
 }

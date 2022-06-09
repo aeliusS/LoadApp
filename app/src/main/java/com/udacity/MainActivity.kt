@@ -8,12 +8,12 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
+import android.widget.RadioButton
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.NotificationCompat
@@ -45,6 +45,7 @@ class MainActivity : AppCompatActivity() {
 
         binding.contentMain.customButton.setOnClickListener {
             if (!validRadioOption()) return@setOnClickListener
+            binding.contentMain.customButton.setButtonLoading()
             download()
         }
     }
@@ -83,11 +84,13 @@ class MainActivity : AppCompatActivity() {
                 notificationManager.sendNotification(
                     context.getText(R.string.notification_description).toString()
                 )
+                // binding.contentMain.customButton.setButtonCompletedDownload()
             }
         }
     }
 
     private fun download() {
+        downloadURL()
         val request =
             DownloadManager.Request(Uri.parse(URL))
                 .setTitle(getString(R.string.app_name))
@@ -99,6 +102,15 @@ class MainActivity : AppCompatActivity() {
         val downloadManager = getSystemService(DOWNLOAD_SERVICE) as DownloadManager
         downloadID =
             downloadManager.enqueue(request)// enqueue puts the download request in the queue.
+    }
+
+    // TODO: return URL string from string resource
+    private fun downloadURL() {
+        when (binding.contentMain.radioGroup.checkedRadioButtonId) {
+            R.id.glide_radio_button -> Log.d("MainActivity", "Glide was selected")
+            R.id.load_app_radio_button -> Log.d("MainActivity", "LoadApp was selected")
+            R.id.retrofit_radio_button -> Log.d("MainActivity", "Retrofit was selected")
+        }
     }
 
     private fun NotificationManager.sendNotification(messageBody: String) {
