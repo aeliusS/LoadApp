@@ -1,4 +1,4 @@
-<resources xmlns:tools="http://schemas.android.com/tools">
+<resources>
     <string name="app_name">LoadApp</string>
     <string name="app_description">Download files from Internet</string>
     <string name="action_settings">Settings</string>
@@ -13,7 +13,7 @@
     <string name="button_download">Download</string>
     <string name="button_loading">We are loading </string>
     <string name="title_activity_detail">DetailActivity</string>
-    <string name="cloud_download_image_decription">Cloud Download Image</string>
+    <string name="cloud_download_image_description">Cloud Download Image</string>
 
     <string name="glide_radio_option">Glide - Image Loading Library by BumpTech</string>
     <string name="load_app_radio_option">LoadApp - Current repository by Udacity</string>
@@ -32,4 +32,5 @@
 
     <string name="detail_screen_file_label">File name:</string>
     <string name="detail_screen_status_label">Status:</string>
+    <string name="detail_screen_ok_button">OK</string>
 </resources>

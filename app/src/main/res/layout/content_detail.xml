@@ -1,66 +1,95 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_marginEnd="@dimen/detail_screen_default_margin"
+    android:fillViewport="true"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context=".DetailActivity"
     tools:showIn="@layout/activity_detail">
 
-    <TextView
-        android:id="@+id/fileNameLabel"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/detail_screen_default_margin"
-        android:layout_marginTop="@dimen/detail_screen_top_margin"
-        android:labelFor="@+id/fileNameText"
-        android:text="@string/detail_screen_file_label"
-        android:textSize="@dimen/default_text_size"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:id="@+id/labelLayout"
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:layout_marginStart="@dimen/detail_screen_default_margin"
+            android:layout_marginTop="@dimen/detail_screen_top_margin"
+            android:orientation="vertical"
+            app:layout_constraintBottom_toBottomOf="@+id/textLayout"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <TextView
+                android:id="@+id/fileNameLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:labelFor="@+id/fileNameText"
+                android:text="@string/detail_screen_file_label"
+                android:textSize="@dimen/default_text_size" />
+
+            <TextView
+                android:id="@+id/statusLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:gravity="bottom"
+                android:labelFor="@+id/statusText"
+                android:text="@string/detail_screen_status_label"
+                android:textSize="@dimen/default_text_size" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/textLayout"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/detail_screen_default_margin"
+            android:layout_marginTop="@dimen/detail_screen_top_margin"
+            android:layout_marginEnd="@dimen/detail_screen_default_margin"
+            android:orientation="vertical"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/labelLayout"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <TextView
+                android:id="@+id/fileNameText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/colorPrimaryDark"
+                android:textSize="@dimen/default_text_size"
+                tools:text="LoadApp - Current repository by Udacity" />
+
+            <TextView
+                android:id="@+id/statusText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/detail_screen_default_margin"
+                android:gravity="fill_horizontal"
+                android:textColor="@color/colorPrimaryDark"
+                android:textSize="@dimen/default_text_size"
+                tools:text="Success" />
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/buttonOk"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/detail_screen_default_margin"
+            android:layout_marginEnd="@dimen/detail_screen_default_margin"
+            android:layout_marginBottom="@dimen/detail_screen_default_margin"
+            android:backgroundTint="?attr/colorAccent"
+            android:text="@string/detail_screen_ok_button"
+            android:textColor="@color/white"
+            android:textSize="@dimen/default_text_size"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
 
 
-    <TextView
-        android:id="@+id/fileNameText"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/detail_screen_default_margin"
-        android:layout_marginTop="@dimen/detail_screen_top_margin"
-        android:layout_marginEnd="@dimen/detail_screen_default_margin"
-        android:textColor="@color/colorPrimaryDark"
-        android:textSize="@dimen/default_text_size"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/fileNameLabel"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:text="LoadApp - Current repository by Udacity" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <TextView
-        android:id="@+id/statusLabel"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/detail_screen_default_margin"
-        android:layout_marginTop="24dp"
-        android:labelFor="@+id/statusText"
-        android:text="@string/detail_screen_status_label"
-        android:textSize="@dimen/default_text_size"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/fileNameText" />
-
-    <TextView
-        android:id="@+id/statusText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/detail_screen_default_margin"
-        android:layout_marginEnd="@dimen/detail_screen_default_margin"
-        android:gravity="fill_horizontal"
-        android:textColor="@color/colorPrimaryDark"
-        android:textSize="@dimen/default_text_size"
-        app:layout_constraintBottom_toBottomOf="@+id/statusLabel"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/statusLabel"
-        tools:text="Success" />
-
-
-</androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.core.widget.NestedScrollView>
