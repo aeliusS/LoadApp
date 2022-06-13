@@ -9,9 +9,10 @@
     tools:context=".DetailActivity"
     tools:showIn="@layout/activity_detail">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <androidx.constraintlayout.motion.widget.MotionLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        app:layoutDescription="@xml/detail_step">
 
         <LinearLayout
             android:id="@+id/labelLayout"
@@ -78,18 +79,12 @@
             android:id="@+id/buttonOk"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/detail_screen_default_margin"
-            android:layout_marginEnd="@dimen/detail_screen_default_margin"
-            android:layout_marginBottom="@dimen/detail_screen_default_margin"
             android:backgroundTint="?attr/colorAccent"
             android:text="@string/detail_screen_ok_button"
             android:textColor="@color/white"
-            android:textSize="@dimen/default_text_size"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent" />
+            android:textSize="@dimen/default_text_size" />
 
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.constraintlayout.motion.widget.MotionLayout>
 
 </androidx.core.widget.NestedScrollView>

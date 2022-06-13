@@ -35,6 +35,8 @@ class DetailActivity : AppCompatActivity() {
             getColor(if (status == "Fail") R.color.red else R.color.colorPrimaryDark)
         )
 
+        // binding.contentDetail.
+
         binding.contentDetail.buttonOk.setOnClickListener {
             Log.d("DetailActivity", "Closing detail screen")
             finish()
