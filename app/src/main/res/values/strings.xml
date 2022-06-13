@@ -29,4 +29,7 @@
     <string name="retrofit_url">https://github.com/square/retrofit/archive/master.zip</string>
 
     <string name="select_file_message">Please select the file to download</string>
+
+    <string name="detail_screen_file_label">File name:</string>
+    <string name="detail_screen_status_label">Status:</string>
 </resources>

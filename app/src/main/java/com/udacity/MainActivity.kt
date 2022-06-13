@@ -176,7 +176,7 @@ class MainActivity : AppCompatActivity() {
         val cursor = downloadManager.query(downloadedFile)
 
         // return if the query returned with no rows
-        if (cursor.isAfterLast) return "Failed"
+        if (cursor.isAfterLast) return "Fail"
         cursor.moveToFirst()
 
         val column = cursor.getColumnIndex(DownloadManager.COLUMN_STATUS)
@@ -185,7 +185,7 @@ class MainActivity : AppCompatActivity() {
 
         return when (status) {
             DownloadManager.STATUS_SUCCESSFUL -> "Success"
-            else -> "Failed"
+            else -> "Fail"
         }
     }
 

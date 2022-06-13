@@ -20,13 +20,20 @@ class DetailActivity : AppCompatActivity() {
         notificationManager.cancel(NOTIFICATION_ID)
 
         // get the file name and status
+        var fileName = "Unknown"
+        var status = "Unknown"
         val extras = intent.extras
         if (extras != null) {
-            val fileName = extras.getString("File") ?: "Unknown file"
-            val status = extras.getString("Status") ?: "Unknown status"
-
-            Log.d("DetailActivity","File name: $fileName. Status: $status")
+            fileName = extras.getString("File") ?: fileName
+            status = extras.getString("Status") ?: status
         }
+        Log.d("DetailActivity", "File name: $fileName. Status: $status")
+
+        binding.contentDetail.fileNameText.text = fileName
+        binding.contentDetail.statusText.text = status
+        binding.contentDetail.statusText.setTextColor(
+            getColor(if (status == "Fail") R.color.red else R.color.colorPrimaryDark)
+        )
     }
 
     companion object {
