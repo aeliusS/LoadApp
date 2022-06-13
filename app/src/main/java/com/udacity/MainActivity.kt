@@ -128,7 +128,7 @@ class MainActivity : AppCompatActivity() {
                         statusString
                     )
                 }
-                // binding.contentMain.customButton.setButtonCompletedDownload()
+                binding.contentMain.customButton.setButtonCompletedDownload()
             }
         }
     }

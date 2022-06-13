@@ -36,10 +36,14 @@ class LoadingButton @JvmOverloads constructor(
     private var buttonText = resources.getString(R.string.button_download)
     private var textPixelSize = textPaint.measureText(buttonText)
     private var percentageLoaded = -1.0f
+
     // determines the size of the loading circle
     private val radius = 0.45f
+
     // determines how far way the loading circle will be placed after the text
     private val circleOffset = 10f
+    private val animationDuration: Long = 1500
+    private var finishedLoading = false
 
     private val buttonPaint = Paint(Paint.ANTI_ALIAS_FLAG)
 
@@ -52,11 +56,15 @@ class LoadingButton @JvmOverloads constructor(
     // use this as a pulse to animate the circle in the button
     // https://medium.com/mindorks/android-property-animation-the-valueanimator-4ca173567cdb
     private val valueAnimator = ValueAnimator.ofFloat(0f, 1f).apply {
-        duration = 1500
+        duration = animationDuration
         addListener(object : AnimatorListenerAdapter() {
+            override fun onAnimationStart(animation: Animator?, isReverse: Boolean) {
+                buttonState = ButtonState.Loading
+            }
             override fun onAnimationEnd(animation: Animator?) {
                 resetButton()
                 Log.d("LoadingButton", "Finished animation")
+                if (finishLoadingAnimation()) buttonState = ButtonState.Completed
             }
         })
         addUpdateListener { updatedAnimation ->
@@ -68,14 +76,8 @@ class LoadingButton @JvmOverloads constructor(
     // use the delegates observable to react to the different button states
     private var buttonState: ButtonState by Delegates.observable(ButtonState.Completed) { prop, old, new ->
         when (new) {
-            ButtonState.Loading -> {
-                if(!valueAnimator.isRunning) valueAnimator.start()
-                buttonText = resources.getString(R.string.button_loading)
-            }
-            ButtonState.Completed -> {
-                // if(valueAnimator.isRunning) valueAnimator.end()
-                buttonText = resources.getString(R.string.button_download)
-            }
+            ButtonState.Loading -> buttonText = resources.getString(R.string.button_loading)
+            ButtonState.Completed -> buttonText = resources.getString(R.string.button_download)
             else -> {}
         }
         textPixelSize = textPaint.measureText(buttonText)
@@ -98,74 +100,6 @@ class LoadingButton @JvmOverloads constructor(
 
         circlePaint.color = loadingCircleColor
         textPaint.color = textColor
-    }
-
-    fun setButtonLoading() {
-        isClickable = false
-        buttonState = ButtonState.Loading
-    }
-
-    fun setButtonCompletedDownload() {
-        buttonState = ButtonState.Completed
-        isClickable = true
-    }
-
-
-    override fun onDraw(canvas: Canvas) {
-        super.onDraw(canvas)
-        drawLoadingWidth(canvas)
-        drawButton(canvas)
-        drawButtonText(canvas)
-        drawLoadingCircle(canvas)
-        // Log.d("LoadingButton", "Finished draw")
-        // logDimensions()
-    }
-
-    private fun logDimensions() {
-        Log.d("LoadingButton", "Arc: ${arcRectF.toShortString()}")
-        Log.d("LoadingButton", "Button: ${buttonRectF.toShortString()}")
-        Log.d("LoadingButton", "Height: $heightSize Width: $widthSize")
-        Log.d("LoadingButton", "ButtonRectBottom: ${buttonRectF.bottom}")
-    }
-
-    private fun drawLoadingCircle(canvas: Canvas) {
-        if (percentageLoaded == -1.0f) return
-        canvas.drawArc(arcRectF, 0F, 360F * percentageLoaded, true, circlePaint)
-    }
-
-    private fun drawLoadingWidth(canvas: Canvas) {
-        if(percentageLoaded == -1.0f) return
-        buttonPaint.color = loadingWidthColor
-        loadingWidthRectF.right = widthSize.toFloat() * percentageLoaded
-        canvas.drawRect(loadingWidthRectF, buttonPaint)
-    }
-
-    private fun drawButton(canvas: Canvas) {
-        buttonPaint.color = buttonColor
-        // limit overdraw
-        if(percentageLoaded != -1.0f) buttonRectF.left = loadingWidthRectF.right
-        canvas.drawRect(buttonRectF, buttonPaint)
-    }
-
-    private fun drawButtonText(canvas: Canvas) {
-        canvas.drawText(buttonText, xTextCenter, yTextCenter, textPaint)
-    }
-
-    private fun updateLoadingCircleDimen() {
-        val halfWidth = widthSize.toFloat() / 2
-        val halfHeight = heightSize.toFloat() / 2
-        arcRectF.top = halfHeight - (halfHeight * radius)
-        arcRectF.bottom = halfHeight + (halfHeight * radius)
-
-        arcRectF.left = halfWidth + (textPixelSize/2) + circleOffset
-        arcRectF.right = arcRectF.left + (2 * halfHeight * radius)
-    }
-
-    private fun updateButtonDimen() {
-        buttonRectF.right = widthSize.toFloat()
-        buttonRectF.bottom = heightSize.toFloat()
-
-        loadingWidthRectF.bottom = heightSize.toFloat()
     }
 
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
@@ -193,11 +127,98 @@ class LoadingButton @JvmOverloads constructor(
         setMeasuredDimension(w, h)
     }
 
+    override fun onDraw(canvas: Canvas) {
+        super.onDraw(canvas)
+        drawLoadingWidth(canvas)
+        drawButton(canvas)
+        drawButtonText(canvas)
+        drawLoadingCircle(canvas)
+        // Log.d("LoadingButton", "Finished draw")
+        // logDimensions()
+    }
+
+    private fun logDimensions() {
+        Log.d("LoadingButton", "Arc: ${arcRectF.toShortString()}")
+        Log.d("LoadingButton", "Button: ${buttonRectF.toShortString()}")
+        Log.d("LoadingButton", "Height: $heightSize Width: $widthSize")
+        Log.d("LoadingButton", "ButtonRectBottom: ${buttonRectF.bottom}")
+    }
+
+    private fun drawLoadingCircle(canvas: Canvas) {
+        if (percentageLoaded == -1.0f) return
+        canvas.drawArc(arcRectF, 0F, 360F * percentageLoaded, true, circlePaint)
+    }
+
+    private fun drawLoadingWidth(canvas: Canvas) {
+        if (percentageLoaded == -1.0f) return
+        buttonPaint.color = loadingWidthColor
+        loadingWidthRectF.right = widthSize.toFloat() * percentageLoaded
+        canvas.drawRect(loadingWidthRectF, buttonPaint)
+    }
+
+    private fun drawButton(canvas: Canvas) {
+        buttonPaint.color = buttonColor
+        // limit overdraw
+        if (percentageLoaded != -1.0f) buttonRectF.left = loadingWidthRectF.right
+        canvas.drawRect(buttonRectF, buttonPaint)
+    }
+
+    private fun drawButtonText(canvas: Canvas) {
+        canvas.drawText(buttonText, xTextCenter, yTextCenter, textPaint)
+    }
+
+    private fun updateLoadingCircleDimen() {
+        val halfWidth = widthSize.toFloat() / 2
+        val halfHeight = heightSize.toFloat() / 2
+        arcRectF.top = halfHeight - (halfHeight * radius)
+        arcRectF.bottom = halfHeight + (halfHeight * radius)
+
+        arcRectF.left = halfWidth + (textPixelSize / 2) + circleOffset
+        arcRectF.right = arcRectF.left + (2 * halfHeight * radius)
+    }
+
+    private fun updateButtonDimen() {
+        buttonRectF.right = widthSize.toFloat()
+        buttonRectF.bottom = heightSize.toFloat()
+
+        loadingWidthRectF.bottom = heightSize.toFloat()
+    }
+
     private fun resetButton() {
         percentageLoaded = -1.0f
         buttonRectF.left = 0.0f
-        buttonState = ButtonState.Completed
+        valueAnimator.duration = animationDuration
         isClickable = true
+    }
+
+    /**
+     * if download finished, do nothing
+     * else if not, reset with a different duration and start again
+     * returns true when the loading animation is meant to be finished
+    **/
+    private fun finishLoadingAnimation(): Boolean {
+        if (finishedLoading) return true
+
+        valueAnimator.duration = (valueAnimator.duration * 1.5).toLong()
+        valueAnimator.start()
+        return false
+    }
+
+    fun setButtonLoading() {
+        isClickable = false
+        finishedLoading = false
+        if (!valueAnimator.isRunning) valueAnimator.start()
+    }
+
+    fun setButtonCompletedDownload() {
+        finishedLoading = true
+        isClickable = true
+        // speed up the animation to completion when the download is finished
+        if (valueAnimator.isRunning) {
+            valueAnimator.pause()
+            valueAnimator.duration = (animationDuration * 0.75).toLong()
+            valueAnimator.resume()
+        }
     }
 
 }
