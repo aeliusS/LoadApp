@@ -9,6 +9,6 @@ This app downloads a file from Internet by clicking on a custom-built button whe
 
 A notification will be sent once the download is complete. When a user clicks on notification, the user lands on detail activity and the notification gets dismissed. In detail activity, the status of the download will be displayed and animated via MotionLayout upon opening the activity.
 
-![The final look of the app](/media/load_app.gif)
+Final Look of the App:
 
-
+<img alt="The final look of the app" height="auto" src="/media/load_app.gif" width="300"/>
