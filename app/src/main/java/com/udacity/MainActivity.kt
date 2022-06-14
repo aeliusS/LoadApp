@@ -38,6 +38,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // Log.d("MainActivity", "onCreate called")
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         setSupportActionBar(binding.toolbar)
@@ -68,6 +69,13 @@ class MainActivity : AppCompatActivity() {
 
     }
 
+    // unregister to prevent memory leaks
+    override fun onDestroy() {
+        // Log.d("MainActivity", "onDestroy called")
+        unregisterReceiver(receiver)
+        super.onDestroy()
+    }
+
     private val receiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             val id = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1)
@@ -79,7 +87,7 @@ class MainActivity : AppCompatActivity() {
                 lifecycleScope.launch {
                     val (radioId, fileName) = getRadioOption()
                     notificationManager.sendNotification(
-                        notifyMessageBody(radioId),
+                        notifyMessageBody(radioId, statusString),
                         fileName,
                         statusString
                     )
@@ -161,12 +169,24 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun notifyMessageBody(radioId: Int): String {
+    private fun notifyMessageBody(radioId: Int, status: String): String {
         return when (radioId) {
-            R.id.glide_radio_button -> getString(R.string.glide_option_prettify)
-            R.id.load_app_radio_button -> getString(R.string.load_app_option_prettify)
-            R.id.retrofit_radio_button -> getString(R.string.retrofit_option_prettify)
-            else -> getString(R.string.custom_option_prettify)
+            R.id.glide_radio_button -> {
+                if (status != "Fail") getString(R.string.glide_option_prettify)
+                else getString(R.string.glide_option_prettify).replace("has been", "couldn't be")
+            }
+            R.id.load_app_radio_button -> {
+                if (status != "Fail") getString(R.string.load_app_option_prettify)
+                else getString(R.string.load_app_option_prettify).replace("has been", "couldn't be")
+            }
+            R.id.retrofit_radio_button -> {
+                if (status != "Fail") getString(R.string.retrofit_option_prettify)
+                else getString(R.string.retrofit_option_prettify).replace("has been", "couldn't be")
+            }
+            else -> {
+                if (status != "Fail") getString(R.string.custom_option_prettify)
+                else getString(R.string.custom_option_prettify).replace("has been", "couldn't be")
+            }
         }
     }
 
@@ -221,7 +241,7 @@ class MainActivity : AppCompatActivity() {
             getString(R.string.notification_channel_id)
         )
             .setSmallIcon(R.drawable.ic_assistant_black_24dp)
-            .setContentTitle(getString(R.string.notification_title))
+            .setContentTitle(status)
             .setContentText(messageBody)
             .setContentIntent(pendingIntent)
             .setAutoCancel(true)
