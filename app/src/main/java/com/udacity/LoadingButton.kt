@@ -53,8 +53,6 @@ class LoadingButton @JvmOverloads constructor(
     private var loadingWidthRectF = RectF()
     private var arcRectF = RectF()
 
-    // use this as a pulse to animate the circle in the button
-    // https://medium.com/mindorks/android-property-animation-the-valueanimator-4ca173567cdb
     private val valueAnimator = ValueAnimator.ofFloat(0f, 1f).apply {
         duration = animationDuration
         addListener(object : AnimatorListenerAdapter() {
@@ -112,8 +110,7 @@ class LoadingButton @JvmOverloads constructor(
         updateLoadingCircleDimen()
     }
 
-    // https://medium.com/@quiro91/custom-view-mastering-onmeasure-a0a0bb11784d
-    // https://developer.android.com/training/custom-views/custom-drawing
+
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         val minw: Int = paddingLeft + paddingRight + suggestedMinimumWidth
         val w: Int = resolveSizeAndState(minw, widthMeasureSpec, 1)
