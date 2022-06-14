@@ -80,6 +80,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:backgroundTint="?attr/colorAccent"
+            android:minHeight="56dp"
             android:text="@string/detail_screen_ok_button"
             android:textColor="@color/white"
             android:textSize="@dimen/default_text_size" />
