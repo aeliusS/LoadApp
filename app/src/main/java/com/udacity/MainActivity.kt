@@ -68,6 +68,46 @@ class MainActivity : AppCompatActivity() {
 
     }
 
+    private val receiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            val id = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1)
+            if (id == downloadID) {
+                Log.d("MainActivity", "Download finished")
+                val statusString = getDownloadStatus(downloadID)
+                Log.d("MainActivity", "Status: $statusString")
+
+                lifecycleScope.launch {
+                    val (radioId, fileName) = getRadioOption()
+                    notificationManager.sendNotification(
+                        notifyMessageBody(radioId),
+                        fileName,
+                        statusString
+                    )
+                }
+                binding.contentMain.customButton.setButtonCompletedDownload()
+
+                // remove the downloaded file since the file is not opened
+                val downloadManager = getSystemService(DOWNLOAD_SERVICE) as DownloadManager
+                val numberRemoved = downloadManager.remove(downloadID)
+                Log.d("MainActivity", "Number of downloads removed: $numberRemoved")
+            }
+        }
+    }
+
+    private fun download(selectedIndex: Int) {
+        val request =
+            DownloadManager.Request(Uri.parse(downloadURL(selectedIndex)))
+                .setTitle(getString(R.string.app_name))
+                .setDescription(getString(R.string.app_description))
+                .setRequiresCharging(false)
+                .setAllowedOverMetered(true)
+                .setAllowedOverRoaming(true)
+
+        val downloadManager = getSystemService(DOWNLOAD_SERVICE) as DownloadManager
+        downloadID =
+            downloadManager.enqueue(request)// enqueue puts the download request in the queue.
+    }
+
     private fun validRadioOption(): Boolean {
         if (binding.contentMain.radioGroup.checkedRadioButtonId == -1) {
             Toast.makeText(applicationContext, R.string.select_file_message, Toast.LENGTH_SHORT)
@@ -110,41 +150,6 @@ class MainActivity : AppCompatActivity() {
             notificationManager = getSystemService(NotificationManager::class.java)
             notificationManager.createNotificationChannel(notificationChannel)
         }
-    }
-
-    private val receiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context, intent: Intent) {
-            val id = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1)
-            if (id == downloadID) {
-                Log.d("MainActivity", "Download finished")
-                val statusString = getDownloadStatus(downloadID)
-                Log.d("MainActivity", "Status: $statusString")
-
-                lifecycleScope.launch {
-                    val (radioId, fileName) = getRadioOption()
-                    notificationManager.sendNotification(
-                        notifyMessageBody(radioId),
-                        fileName,
-                        statusString
-                    )
-                }
-                binding.contentMain.customButton.setButtonCompletedDownload()
-            }
-        }
-    }
-
-    private fun download(selectedIndex: Int) {
-        val request =
-            DownloadManager.Request(Uri.parse(downloadURL(selectedIndex)))
-                .setTitle(getString(R.string.app_name))
-                .setDescription(getString(R.string.app_description))
-                .setRequiresCharging(false)
-                .setAllowedOverMetered(true)
-                .setAllowedOverRoaming(true)
-
-        val downloadManager = getSystemService(DOWNLOAD_SERVICE) as DownloadManager
-        downloadID =
-            downloadManager.enqueue(request)// enqueue puts the download request in the queue.
     }
 
     private fun downloadURL(selectedIndex: Int): String {
