@@ -241,7 +241,7 @@ class MainActivity : AppCompatActivity() {
             getString(R.string.notification_channel_id)
         )
             .setSmallIcon(R.drawable.ic_assistant_black_24dp)
-            .setContentTitle(status)
+            .setContentTitle("LoadApp: $status")
             .setContentText(messageBody)
             .setContentIntent(pendingIntent)
             .setAutoCancel(true)

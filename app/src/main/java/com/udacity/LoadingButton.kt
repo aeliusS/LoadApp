@@ -12,6 +12,7 @@ import android.util.AttributeSet
 import android.util.Log
 import android.view.View
 import androidx.core.content.withStyledAttributes
+import kotlin.math.ceil
 import kotlin.properties.Delegates
 
 class LoadingButton @JvmOverloads constructor(
@@ -43,6 +44,7 @@ class LoadingButton @JvmOverloads constructor(
     // determines how far way the loading circle will be placed after the text
     private val circleOffset = 10f
     private val animationDuration: Long = 1500
+    private var loadingDuration = animationDuration
     private var finishedLoading = false
 
     private val buttonPaint = Paint(Paint.ANTI_ALIAS_FLAG)
@@ -195,8 +197,8 @@ class LoadingButton @JvmOverloads constructor(
     **/
     private fun finishLoadingAnimation(): Boolean {
         if (finishedLoading) return true
-
-        valueAnimator.duration = (valueAnimator.duration * 1.5).toLong()
+        loadingDuration = ceil(loadingDuration * 1.5).toLong()
+        valueAnimator.duration = loadingDuration
         valueAnimator.start()
         return false
     }
@@ -204,6 +206,7 @@ class LoadingButton @JvmOverloads constructor(
     fun setButtonLoading() {
         isClickable = false
         finishedLoading = false
+        loadingDuration = animationDuration
         if (!valueAnimator.isRunning) valueAnimator.start()
     }
 
