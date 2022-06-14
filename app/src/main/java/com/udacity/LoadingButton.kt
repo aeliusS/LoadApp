@@ -72,7 +72,7 @@ class LoadingButton @JvmOverloads constructor(
     }
 
     // use the delegates observable to react to the different button states
-    private var buttonState: ButtonState by Delegates.observable(ButtonState.Completed) { prop, old, new ->
+    private var buttonState: ButtonState by Delegates.observable(ButtonState.Completed) { _, _, new ->
         when (new) {
             ButtonState.Loading -> buttonText = resources.getString(R.string.button_loading)
             ButtonState.Completed -> buttonText = resources.getString(R.string.button_download)
